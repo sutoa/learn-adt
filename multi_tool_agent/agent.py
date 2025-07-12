@@ -1,5 +1,6 @@
 import datetime
 from zoneinfo import ZoneInfo
+import requests
 from google.adk.agents import Agent, LlmAgent
 from google.adk.models.lite_llm import LiteLlm
 from .config import OPENAI_API_KEY
@@ -56,7 +57,27 @@ def get_current_time(city: str) -> dict:
     return {"status": "success", "report": report}
 
 
+def get_post(post_id: int) -> dict:
+    """Retrieves a post from JSONPlaceholder API by its ID.
 
+    Args:
+        post_id (int): The ID of the post to retrieve.
+
+    Returns:
+        dict: status and result or error msg.
+    """
+    try:
+        response = requests.get(f"https://jsonplaceholder.typicode.com/posts/{post_id}")
+        response.raise_for_status()  # Raises an HTTPError for bad responses (4xx, 5xx)
+        return {
+            "status": "success",
+            "post": response.json()
+        }
+    except requests.RequestException as e:
+        return {
+            "status": "error",
+            "error_message": f"Failed to fetch post {post_id}: {str(e)}"
+        }
 
 root_agent = LlmAgent(
     name="weather_time_agent",
@@ -67,5 +88,5 @@ root_agent = LlmAgent(
     instruction=(
         "You are a helpful agent who can answer user questions about the time and weather in a city."
     ),
-    tools=[get_weather, get_current_time],
+    tools=[get_weather, get_current_time, get_post],
 )
