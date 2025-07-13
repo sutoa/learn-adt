@@ -4,6 +4,7 @@ import requests
 from google.adk.agents import Agent, LlmAgent
 from google.adk.models.lite_llm import LiteLlm
 from .config import OPENAI_API_KEY
+from google.adk.tools.tool_context import ToolContext
 
 def get_weather(city: str) -> dict:
     """Retrieves the current weather report for a specified city.
@@ -57,16 +58,21 @@ def get_current_time(city: str) -> dict:
     return {"status": "success", "report": report}
 
 
-def get_post(post_id: int) -> dict:
+def get_post(post_id: int, crds_id: int) -> dict:
     """Retrieves a post from JSONPlaceholder API by its ID.
 
     Args:
         post_id (int): The ID of the post to retrieve.
+        # crds_id (str): The credentials ID for tracking the request.
 
     Returns:
-        dict: status and result or error msg.
+        dict: A dictionary containing:
+            - status (str): "success" or "error"
+            - post (dict): The post data if successful
+            - error_message (str): Error description if failed
     """
     try:
+        print(f"crds_id: {crds_id}")
         response = requests.get(f"https://jsonplaceholder.typicode.com/posts/{post_id}")
         response.raise_for_status()  # Raises an HTTPError for bad responses (4xx, 5xx)
         return {
